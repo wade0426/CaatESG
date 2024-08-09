@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Editor</title>
+
+    <link rel="stylesheet" href="ESG網站.css">
+    
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+    <script type="module" src="ESG網站.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-pane">
+            <h2>履歷編輯</h2>
+            <form id="resume-form">
+                <label for="name">姓名：</label>
+                <input type="text" id="name" name="name" required><br><br>
+
+                <label for="phone">電話：</label>
+                <input type="tel" id="phone" name="phone" required><br><br>
+
+                <label for="email">聯絡信箱：</label>
+                <input type="email" id="email" name="email" required><br><br>
+
+                <label for="summary">簡歷：</label>
+                <textarea id="summary" name="summary" rows="5" required></textarea><br><br>
+
+                <button type="button" onclick="updatePreview()">預覽</button>
+            </form>
+        </div>
+        <div class="right-pane">
+            <h2>PDF 預覽</h2>
+            <div id="pdf-preview">
+                <p id="preview-summary">簡歷</p>
+                <div id="canvasContainer">
+                    <p><button type="button" onclick="ShowPDF()">ShowPDF</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
