@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 編輯網站</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #leftPane {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #rightPane {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+        textarea {
+            width: 100%;
+            height: 80%;
+            font-size: 16px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        iframe {
+            width: 100%;
+            height: 80%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="leftPane">
+    <textarea id="textInput" placeholder="在此輸入文字..."></textarea>
+    <button onclick="generatePDF()">下載 PDF</button>
+</div>
+
+<div id="rightPane">
+    <iframe id="pdfPreview"></iframe>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<script>
+    const textInput = document.getElementById('textInput');
+    const pdfPreview = document.getElementById('pdfPreview');
+
+    textInput.addEventListener('input', updatePDF);
+
+    function updatePDF() {
+        const docDefinition = {
+            content: textInput.value
+        };
+
+        pdfMake.createPdf(docDefinition).getBlob(function (blob) {
+            const url = URL.createObjectURL(blob);
+            pdfPreview.src = url;
+        });
+    }
+
+    function generatePDF() {
+        const docDefinition = {
+            content: textInput.value
+        };
+
+        pdfMake.createPdf(docDefinition).download('document.pdf');
+    }
+
+    // 初始顯示空白 PDF
+    updatePDF();
+</script>
+
+</body>
+</html>
