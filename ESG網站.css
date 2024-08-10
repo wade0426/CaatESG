@@ -75,3 +75,20 @@ button:hover {
 #pdf-preview h3, #pdf-preview p {
     margin: 10px 0;
 }
+#input-area {
+    flex: 1;
+    padding: 20px;
+    border-right: 1px solid #ccc;
+}
+#pdf-viewer {
+    flex: 1;
+    overflow: auto;
+}
+textarea {
+    width: 100%;
+    height: 80vh;
+    resize: none;
+}
+#download-btn {
+    margin-top: 10px;
+}

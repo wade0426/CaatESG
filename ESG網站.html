@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Editor_1</title>
+    <title>Resume Editor</title>
 
     <link rel="stylesheet" href="ESG網站.css">
     
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
     <script type="module" src="ESG網站.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -30,17 +30,66 @@
                 <textarea id="summary" name="summary" rows="5" required></textarea><br><br>
 
                 <button type="button" onclick="updatePreview()">預覽</button>
+
+                <div id="input-area">
+                    <textarea id="text-input" placeholder="在此輸入文字..."></textarea>
+                    <button id="download-btn">下載 PDF</button>
+                </div>
+
             </form>
         </div>
         <div class="right-pane">
             <h2>PDF 預覽</h2>
             <div id="pdf-preview">
-                <p id="preview-summary">簡歷</p>
                 <div id="canvasContainer">
                     <p><button type="button" onclick="ShowPDF()">ShowPDF</button></p>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        const { jsPDF } = window.jspdf;
+
+        const textInput = document.getElementById('text-input');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const downloadBtn = document.getElementById('download-btn');
+
+        function updatePDF() {
+            const doc = new jsPDF();
+            doc.text(textInput.value, 10, 10);
+            const pdfData = doc.output('datauristring');
+
+            pdfjsLib.getDocument(pdfData).promise.then(pdf => {
+                pdf.getPage(1).then(page => {
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale });
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+
+                    pdfViewer.innerHTML = '';
+                    pdfViewer.appendChild(canvas);
+                    page.render(renderContext);
+                });
+            });
+        }
+
+        textInput.addEventListener('input', updatePDF);
+
+        downloadBtn.addEventListener('click', () => {
+            const doc = new jsPDF();
+            doc.text(textInput.value, 10, 10);
+            doc.save('document.pdf');
+        });
+
+        updatePDF();
+    </script>
 </body>
 </html>
