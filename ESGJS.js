@@ -46,3 +46,20 @@ function ShowPDF() {
 window.onload = function() {
     ShowPDF();
 };
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const summary = document.getElementById('summary').value;
+
+    // 使用 fetch 读取 PDF 文件
+    fetch('./測試PDF.pdf')
+        .then(response => response.arrayBuffer())
+        .then(pdfBytes => {
+            // 调用 editPDF 函数修改 PDF 并下载
+            editPDF(pdfBytes, name, email, summary);
+        })
+        .catch(error => {
+            console.error('Error fetching PDF:', error);
+        });
+});

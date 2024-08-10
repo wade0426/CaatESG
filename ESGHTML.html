@@ -11,6 +11,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <script src="./PDFEditor.js"></script>
 </head>
 <body>
     <div class="container">
@@ -31,10 +36,7 @@
 
                 <button type="button" onclick="updatePreview()">預覽</button>
 
-                <div id="input-area">
-                    <textarea id="text-input" placeholder="在此輸入文字..."></textarea>
-                    <button id="download-btn">下載 PDF</button>
-                </div>
+                <button id="downloadBtn">下載 PDF</button>
 
             </form>
         </div>
