@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 編輯器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        .left-panel,
+        .right-panel {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #editor {
+            width: 100%;
+            height: calc(100% - 80px);
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: none;
+        }
+
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+        }
+
+        #download-btn,
+        #file-input {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <textarea id="editor"></textarea>
+            <input type="file" id="file-input" accept=".pdf">
+            <button id="download-btn">下載 PDF</button>
+            <div id="error-message"></div>
+        </div>
+        <div class="right-panel">
+            <div id="pdf-viewer"></div>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+
+        const editor = document.getElementById('editor');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const downloadBtn = document.getElementById('download-btn');
+        const fileInput = document.getElementById('file-input');
+        const errorMessage = document.getElementById('error-message');
+
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let isComposing = false;
+
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDoc.getPage(num).then(function (page) {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function () {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+
+                pdfViewer.innerHTML = '';
+                pdfViewer.appendChild(canvas);
+            });
+        }
+
+        function loadPDF(pdfData) {
+            pdfjsLib.getDocument(pdfData).promise.then(function (pdf) {
+                pdfDoc = pdf;
+                renderPage(pageNum);
+
+                return pdf.getPage(1);
+            }).then(function (page) {
+                return page.getTextContent();
+            }).then(function (textContent) {
+                const textItems = textContent.items;
+                let text = '';
+                for (let i = 0; i < textItems.length; i++) {
+                    text += textItems[i].str;
+                }
+                editor.value = text;
+                errorMessage.textContent = '';
+            }).catch(function (error) {
+                errorMessage.textContent = '載入 PDF 時發生錯誤：' + error.message;
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const updatePDF = debounce(function () {
+            if (!isComposing) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text(editor.value, 10, 10);
+                const pdfDataUri = doc.output('datauristring');
+                loadPDF(pdfDataUri);
+            }
+        }, 500);
+
+        editor.addEventListener('input', updatePDF);
+        editor.addEventListener('compositionstart', () => { isComposing = true; });
+        editor.addEventListener('compositionend', () => {
+            isComposing = false;
+            updatePDF();
+        });
+
+        downloadBtn.addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(editor.value, 10, 10);
+            doc.save('edited_file.pdf');
+        });
+
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file.type !== 'application/pdf') {
+                errorMessage.textContent = '請選擇 PDF 文件。';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                loadPDF(new Uint8Array(e.target.result));
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // 初始化時不自動載入 file.pdf
+        errorMessage.textContent = '請上傳一個 PDF 文件以開始編輯。';
+    </script>
+</body>
+
+</html>
