@@ -7,6 +7,9 @@ async function editPDF(pdfBytes, name, email, summary) {
         const firstPage = pages[0];
         
         const fontSize = 12;
+
+        console.log("Drawing text:", name, email, summary); // 调试信息
+
         firstPage.drawText(name, {
             x: 50,
             y: firstPage.getHeight() - 50,
@@ -33,6 +36,8 @@ async function editPDF(pdfBytes, name, email, summary) {
 
         // 保存修改后的 PDF 文档
         const modifiedPdfBytes = await pdfDoc.save();
+        console.log("PDF modified successfully"); // 调试信息
+
         const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
         saveAs(blob, '修改後的履歷.pdf');
     } catch (error) {

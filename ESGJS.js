@@ -1,10 +1,10 @@
-// 引入 PDFJS 库
+// 引入 PDFJS
 import * as PDFJS from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs";
 
-// 手动设置 workerSrc 路径
+// 手动设置 workerSrc 路徑
 PDFJS.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.mjs";
 
-const pdfUrl = "./測試PDF.pdf"; // PDF 文件的路径
+const pdfUrl = "./測試PDF.pdf"; // PDF 文件的路徑
 
 function updatePreview() {
     const name = document.getElementById('name').value;
@@ -47,16 +47,22 @@ window.onload = function() {
     ShowPDF();
 };
 
-  document.getElementById('downloadBtn').addEventListener('click', () => {
+  // 确保editPDF被成功调用
+  document.getElementById('downloadBtn').addEventListener('click', (event) => {
+    event.preventDefault();  // 阻止表单的提交動作
+
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const summary = document.getElementById('summary').value;
 
-    // 使用 fetch 读取 PDF 文件
+    console.log("Name:", name);       // 调试信息
+    console.log("Email:", email);     // 调试信息
+    console.log("Summary:", summary); // 调试信息
+
     fetch('./測試PDF.pdf')
         .then(response => response.arrayBuffer())
         .then(pdfBytes => {
-            // 调用 editPDF 函数修改 PDF 并下载
+            // 调用 editPDF 函数修改 PDF 並下載
             editPDF(pdfBytes, name, email, summary);
         })
         .catch(error => {
