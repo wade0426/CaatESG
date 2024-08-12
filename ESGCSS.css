@@ -23,13 +23,13 @@ body {
 }
 
 .left-pane {
-    width: 50%;
+    width: 40%;
     border-right: 1px solid #ddd;
     overflow-y: auto;
 }
 
 .right-pane {
-    width: 50%;
+    width: 60%;
     display: flex;
     flex-direction: column;
     align-items: center;

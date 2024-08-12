@@ -7,17 +7,22 @@
 
     <link rel="stylesheet" href="ESGCSS.css">
     <!-- 字體 -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400&display=swap" rel="stylesheet">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
     
     <script type="module" src="ESGJS.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
+    <!-- 類似PATH的函式庫 -->
+    <script src="https://unpkg.com/path-browserify@latest/path-browserify.min.js"></script>
+    <!-- 自訂字體所需的函式庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
     <script src="./PDFEditor.js"></script>
 </head>
 <body>
@@ -40,6 +45,7 @@
                 <button type="button" onclick="updatePreview()">預覽</button>
 
                 <button id="downloadBtn">下載 PDF</button>
+                <button id="generatePdfButton">生成 PDF測試</button>
 
             </form>
         </div>
@@ -52,5 +58,76 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('generatePdfButton').addEventListener('click', async function() {
+        event.preventDefault();  // 阻止表单的提交動作
+        const userName = document.getElementById('name').value;
+        const userSummary = document.getElementById('summary').value;
+
+        // 調用生成 PDF 函數
+        embedFontOnly(userName, userSummary);
+        });
+        async function embedFontOnly(name, Summary) {
+            
+            const { PDFDocument } = PDFLib;
+            const fontkit = window.fontkit;
+
+            // const { PDFDocument } = PDFLib;
+            
+            // 讀取 PDF 文件（可以是一個空的模板）
+            const response = await fetch('/PDFTest/測試PDF.pdf'); // 更新為你的 PDF 文件 URL
+            const pdfBytes = await response.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+
+            // 註冊 fontkit
+            pdfDoc.registerFontkit(fontkit);
+
+            // 載入自訂字體
+            const fontResponse = await fetch('./FontTest/NotoSansTC-VariableFont_wght.ttf'); // 更新為你的字體文件 URL
+            const fontBytes = await fontResponse.arrayBuffer();
+            const customFont = await pdfDoc.embedFont(fontBytes);
+
+            // 確保字體嵌入
+            console.log('Font has been embedded in the PDF.');
+
+            // 添加文本到 PDF 中
+            const pages = pdfDoc.getPages();
+            const firstPage = pages[0];
+
+            // 設置文字大小和位置
+            firstPage.drawText(`姓名: ${name}`, {
+                x: 50,
+                y: 700,
+                size: 24,
+                font: customFont,
+                color: PDFLib.rgb(0, 0, 0),
+            });
+
+            firstPage.drawText(`簡歷: ${Summary}`, {
+                x: 50,
+                y: 650,
+                size: 16,
+                font: customFont,
+                color: PDFLib.rgb(0, 0, 0),
+            });
+
+            // 保存 PDF
+            const newPdfBytes = await pdfDoc.save();
+            
+            try {
+                // 下載 PDF 文件
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(new Blob([newPdfBytes], { type: 'application/pdf' }));
+                link.download = 'output.pdf';
+                link.click();
+            } catch (e) {
+                return console.log('Fail.');
+            }
+        }
+
+        // 呼叫函式進行字體嵌入
+        // embedFontOnly();
+    </script>
+
 </body>
 </html>

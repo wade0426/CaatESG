@@ -4,7 +4,7 @@ import * as PDFJS from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pd
 // 手动设置 workerSrc 路徑
 PDFJS.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.mjs";
 
-const pdfUrl = "./測試PDF.pdf"; // PDF 文件的路徑
+const pdfUrl = "./PDFTest/測試PDF.pdf"; // PDF 文件的路徑
 
 function updatePreview() {
     const name = document.getElementById('name').value;
@@ -59,7 +59,7 @@ window.onload = function() {
     console.log("Email:", email);     // 调试信息
     console.log("Summary:", summary); // 调试信息
 
-    fetch('./測試PDF.pdf')
+    fetch('./PDFTest/測試PDF.pdf')
         .then(response => response.arrayBuffer())
         .then(pdfBytes => {
             // 调用 editPDF 函数修改 PDF 並下載
